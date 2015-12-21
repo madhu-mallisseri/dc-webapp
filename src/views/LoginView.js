@@ -5,7 +5,7 @@ import {actions as loginInfoActions} from '../redux/modules/loginInfo';
 
 import styles from '../styles/_style.scss';
 
-
+const loginInfoAction = { loginInfoActions };
 export class LoginView extends React.Component {
 
   constructor (props) {
@@ -36,7 +36,7 @@ export class LoginView extends React.Component {
     const self = this;
     this.props.dispatch(login(username.value, password.value)).then(function (response) {
       if (response.user) {
-        self.props = { 'user' : response.user };
+        self.props = { 'user' : response };
         console.log(self.context.store);
         // self.context.store.replaceReducer('isLoggedIn',true);
         // loginInfoActions.setLoggedIn(true);
@@ -99,7 +99,7 @@ LoginView.contextTypes = {
 };
 
 LoginView.propTypes = {
-  user: PropTypes.string,
+  user: PropTypes.object,
   loginError: PropTypes.object,
   setLoggedIn: PropTypes.func.isRequired,
   dispatch: PropTypes.func.isRequired
@@ -114,4 +114,4 @@ function mapStateToProps (state) {
   return {user: null};
 }
 
-export default connect(mapStateToProps)(LoginView);
+export default connect(mapStateToProps, loginInfoAction)(LoginView);

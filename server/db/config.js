@@ -1,2 +1,5 @@
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost:27017/data-coral');
+mongoose.connect('mongodb://localhost/data-coral', function(err){
+  console.log("CONNECTED");
+  console.log(err);
+});

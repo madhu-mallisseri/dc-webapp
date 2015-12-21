@@ -2,35 +2,56 @@ import express from 'express';
 import historyApiFallback from 'connect-history-api-fallback';
 import config from '../config';
 import bodyParser from 'body-parser';
-import dbConfig from './db/config.js';
+// import dbConfig from './db/config';
+import User from './models/user';
 
+const mongoose = require('mongoose');
+mongoose.connect('mongodb://localhost:27017/data-coral');
+// const mongoose = require('mongoose');
 const app = express();
 const debug = require('debug')('app:server');
 const paths = config.utils_paths;
 
-app.use(bodyParser.json({ type: 'application/json' }));
+app.use(bodyParser.json({
+  type: 'application/json'
+}));
 
 app.use(historyApiFallback({
   verbose: false
 }));
 
 app.post('/api/login', function(req, res) {
-      console.log("Request");
-      console.log(req.user);
-      // console.log(req.socket);
-      console.log(req.stack);
-      const credentials = req.body;
-      console.log("credentials");
-      console.log(credentials);
-      if(credentials.user==='admin' && credentials.password==='password'){
-        res.json({'user': credentials.user, 'role': 'ADMIN'});
-      }else{
-        res.status('500').send({'message' : 'Invalid user/password'});
-      }
+  mongoose.model('users').find({}, function(err, user) {
+    console.log('-------USER------');
+    console.log(user);
+    console.log("Request");
+    console.log(req.user);
+    // console.log(req.socket);
+    console.log(req.stack);
+    const credentials = req.body;
+    console.log("credentials");
+    console.log(credentials);
+    if (credentials.user === user.email && credentials.password === user.password) {
+      res.json({
+        'name': user.name,
+        'company': user.company,
+        'email': user.email,
+        'userId': user._id
+      });
+    } else {
+      res.status('500').send({
+        'message': 'Invalid user/password'
+      });
+    }
+  });
+
 });
 
 app.post('/api/logout', function(req, res) {
-    res.json({'user': 'admin', 'role': 'ADMIN'});
+  res.json({
+    'user': 'admin',
+    'role': 'ADMIN'
+  });
 });
 
 // Serve app with Webpack if HMR is enabled
@@ -43,7 +64,9 @@ if (config.compiler_enable_hmr) {
     compiler,
     publicPath: webpackConfig.output.publicPath
   }));
-  app.use(require('./middleware/webpack-hmr')({ compiler }));
+  app.use(require('./middleware/webpack-hmr')({
+    compiler
+  }));
 
 
 } else {
